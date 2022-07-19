@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="17.947008"
+   height="17.947008"
+   viewBox="0 0 4.7484792 4.7484792"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2 (56b05e47e7, 2022-06-09, custom)"
+   sodipodi:docname="map_marker.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="23.860606"
+     inkscape:cx="2.9337059"
+     inkscape:cy="9.8069596"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2087"
+       originx="-0.84033165"
+       originy="-0.80076011" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2">
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter764"
+       x="-0.090000004"
+       y="-0.1"
+       width="1.2"
+       height="1.2"
+       inkscape:auto-region="false">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood754" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite756" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="0.5"
+         result="blur"
+         id="feGaussianBlur758" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset"
+         id="feOffset760" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="fbSourceGraphic"
+         id="feComposite762" />
+      <feColorMatrix
+         result="fbSourceGraphicAlpha"
+         in="fbSourceGraphic"
+         values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"
+         id="feColorMatrix778" />
+      <feFlood
+         id="feFlood780"
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         in="fbSourceGraphic" />
+      <feComposite
+         in2="fbSourceGraphic"
+         id="feComposite782"
+         in="flood"
+         operator="in"
+         result="composite1" />
+      <feGaussianBlur
+         id="feGaussianBlur784"
+         in="composite1"
+         stdDeviation="0.3"
+         result="blur" />
+      <feOffset
+         id="feOffset786"
+         dx="0"
+         dy="0"
+         result="offset" />
+      <feComposite
+         in2="offset"
+         id="feComposite788"
+         in="fbSourceGraphic"
+         operator="over"
+         result="composite2" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-29.358498,-63.546093)">
+    <g
+       id="g452"
+       transform="matrix(0.62315997,0,0,0.62315997,10.746787,23.644953)"
+       style="filter:url(#filter764)"
+       inkscape:export-filename="../e4b124f9/marker.png"
+       inkscape:export-xdpi="128.37794"
+       inkscape:export-ydpi="128.37794">
+      <circle
+         style="fill:#ffffff;fill-opacity:1;stroke-width:0.0387456"
+         id="path184"
+         cx="33.613167"
+         cy="67.840332"
+         r="3.175" />
+      <ellipse
+         style="fill:#4285f4;fill-opacity:1;stroke-width:0.0665708"
+         id="path344"
+         cx="33.613167"
+         cy="67.840332"
+         rx="2.6458333"
+         ry="2.6193707" />
+    </g>
+  </g>
+</svg>

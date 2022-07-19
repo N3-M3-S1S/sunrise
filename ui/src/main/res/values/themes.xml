@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Sunrise.Splash" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splashscreen</item>
+        <item name="postSplashScreenTheme">@style/Theme.Sunrise</item>
+    </style>
+
+    <style name="Theme.Sunrise" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:colorBackground">@color/background</item>
+    </style>
+</resources>

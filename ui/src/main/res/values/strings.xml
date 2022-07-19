@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Sunrise&amp;Sunset</string>
+    <string name="not_available">N/A</string>
+    <string name="day_details">Day details</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="sunset">Sunset</string>
+    <string name="zenith">Zenith</string>
+    <string name="duration">Duration</string>
+    <string name="twilights">Twilights</string>
+    <string name="twilight_civil">Civil</string>
+    <string name="twilight_nautical">Nautical</string>
+    <string name="twilight_astronomical">Astronomical</string>
+    <string name="start">Start</string>
+    <string name="end">End</string>
+    <string name="daterange_from">From</string>
+    <string name="daterange_to">To</string>
+    <string name="add_location_title">Add location</string>
+    <string name="locations_title">Locations</string>
+    <string name="delete">Delete</string>
+    <string name="looking_for_current_location">Looking for current location</string>
+    <string name="current_location">Current location</string>
+    <string name="location_added">Location added</string>
+    <string name="name">Name</string>
+    <string name="location_with_name_exists">Location with this name already exists</string>
+    <string name="latitude">Latitude</string>
+    <string name="latitude_invalid">Invalid latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="longitude_invalid">Invalid longitude</string>
+    <string name="current_location_not_found">Current location not found</string>
+    <string name="name_contains_forbidden_characters">Name contains forbidden characters</string>
+    <string name="select_on_map">Select on map</string>
+    <string name="enter_coordinates">Enter coordinates</string>
+    <string name="map">Map</string>
+    <string-array name="location_tabs_titles">
+        <item>Details</item>
+        <item>Calendar</item>
+    </string-array>
+</resources>
