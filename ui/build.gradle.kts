@@ -61,6 +61,7 @@ dependencies {
     implementation(Dependencies.Android.Compose.PAGING)
     implementation(Dependencies.Android.Compose.ICONS_EXTENDED)
     implementation(Dependencies.Android.Compose.PREVIEW)
+    debugImplementation(Dependencies.Android.Compose.TOOLING)
     androidTestImplementation(Dependencies.Android.Compose.TESTING)
 
     implementation(Dependencies.Android.Compose.Accompanist.PAGER)
@@ -74,7 +75,7 @@ dependencies {
     kapt(Dependencies.Android.Lifecycle.COMPILER)
     implementation(Dependencies.Android.Lifecycle.VIEWMODEL_COMPOSE)
     implementation(Dependencies.Android.Lifecycle.VIEWMODEL_KTX)
-
+    implementation(Dependencies.Android.Lifecycle.RUNTIME_COMPOSE)
 
     ksp(Dependencies.ComposeDestinations.COMPILER)
     implementation(Dependencies.ComposeDestinations.CORE)

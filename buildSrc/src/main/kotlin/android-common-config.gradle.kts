@@ -5,11 +5,11 @@ plugins {
 }
 
 extensions.getByType<BaseExtension>().apply {
-    compileSdkVersion(32)
+    compileSdkVersion(33)
 
     defaultConfig {
         minSdk = 23
-        targetSdk = 32
+        targetSdk = 33
     }
 
 

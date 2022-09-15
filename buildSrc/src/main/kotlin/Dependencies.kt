@@ -1,7 +1,7 @@
 object Dependencies {
 
     object Android {
-        private const val ANDROID_GRADLE_PLUGIN_VERSION = "7.2.1"
+        private const val ANDROID_GRADLE_PLUGIN_VERSION = "7.2.2"
         private const val CORE_VERSION = "1.8.0"
         private const val CORE_LIBRARY_DESUGARING_VERSION = "1.1.5"
 
@@ -23,7 +23,7 @@ object Dependencies {
                     "com.google.accompanist:accompanist-systemuicontroller:$VERSION"
             }
 
-            private const val COMPOSE_VERSION = "1.2.0-rc02"
+            private const val COMPOSE_VERSION = "1.2.1"
             private const val MATERIAL_VERSION = "1.0.0-alpha13"
             private const val ACTIVITY_VERSION = "1.4.0"
             private const val PAGING_VERSION = "1.0.0-alpha15"
@@ -36,14 +36,16 @@ object Dependencies {
             const val ICONS_EXTENDED =
                 "androidx.compose.material:material-icons-extended:$COMPOSE_VERSION"
             const val TESTING = "androidx.compose.ui:ui-test-junit4:$COMPOSE_VERSION"
+            const val TOOLING = "androidx.compose.ui:ui-tooling:$COMPOSE_VERSION"
         }
 
         object Lifecycle {
-            private const val VERSION = "2.5.0"
+            private const val VERSION = "2.6.0-alpha02"
 
             const val COMPILER = "androidx.lifecycle:lifecycle-compiler:$VERSION"
             const val VIEWMODEL_KTX = "androidx.lifecycle:lifecycle-viewmodel-ktx:$VERSION"
             const val VIEWMODEL_COMPOSE = "androidx.lifecycle:lifecycle-viewmodel-compose:$VERSION"
+            const val RUNTIME_COMPOSE = "androidx.lifecycle:lifecycle-runtime-compose:$VERSION"
         }
 
         object Paging {
