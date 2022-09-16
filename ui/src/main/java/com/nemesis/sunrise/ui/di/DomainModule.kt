@@ -1,10 +1,12 @@
 package com.nemesis.sunrise.ui.di
 
+import com.nemesis.sunrise.data.location.DefaultLocationNameStore
 import com.nemesis.sunrise.data.location.database.LocationsDao
 import com.nemesis.sunrise.data.location.database.LocationsDatabaseRepository
 import com.nemesis.sunrise.domain.location.LocationsRepository
 import com.nemesis.sunrise.domain.location.usecase.CheckLocationNameAvailable
 import com.nemesis.sunrise.domain.location.usecase.DeleteLocations
+import com.nemesis.sunrise.domain.location.usecase.GetLocationByName
 import com.nemesis.sunrise.domain.location.usecase.GetLocations
 import com.nemesis.sunrise.domain.location.usecase.ReduceCoordinateExcessAccuracy
 import com.nemesis.sunrise.domain.location.usecase.SaveLocation
@@ -48,6 +50,10 @@ object DomainModule {
         DeleteLocations(locationsRepository)
 
     @Provides
+    fun providesGetLocationByName(locationsRepository: LocationsRepository) =
+        GetLocationByName(locationsRepository)
+
+    @Provides
     fun providesLatitudeStringValidation() = ValidateLatitude()
 
     @Provides
@@ -62,8 +68,11 @@ object DomainModule {
 
     @Provides
     @Singleton
-    fun providesLocationRepository(locationsDao: LocationsDao): LocationsRepository =
-        LocationsDatabaseRepository(locationsDao)
+    fun providesLocationRepository(
+        locationsDao: LocationsDao,
+        defaultLocationNameStore: DefaultLocationNameStore
+    ): LocationsRepository =
+        LocationsDatabaseRepository(locationsDao, defaultLocationNameStore)
 
     @Provides
     fun providesGetLocation(locationsRepository: LocationsRepository): GetLocations =

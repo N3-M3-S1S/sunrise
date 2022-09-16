@@ -1,9 +1,11 @@
 @file:OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalPagerApi::class, ExperimentalMaterial3Api::class
+    ExperimentalMaterial3Api::class,
+    ExperimentalPagerApi::class,
 )
 
 package com.nemesis.sunrise.ui.location
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,9 +17,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -33,8 +38,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -44,13 +51,21 @@ import com.nemesis.sunrise.domain.location.Coordinates
 import com.nemesis.sunrise.domain.location.Location
 import com.nemesis.sunrise.ui.components.BackIconButton
 import com.nemesis.sunrise.ui.components.pagerTabIndicatorOffsetMaterial3
+import com.nemesis.sunrise.ui.destinations.LocationScreenDestination
+import com.nemesis.sunrise.ui.destinations.LocationsScreenDestination
 import com.nemesis.sunrise.ui.location.calendar.CalendarScreen
+import com.nemesis.sunrise.ui.location.details.LocationDetails
 import com.nemesis.sunrise.ui.location.details.LocationDetailsScreen
+import com.nemesis.sunrise.ui.utils.LocalDateRange
+import com.nemesis.sunrise.ui.utils.LocalTime
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.popUpTo
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 
 @Destination(navArgsDelegate = LocationScreenNavArgs::class)
 @Composable
@@ -59,12 +74,25 @@ fun LocationScreen(
     viewModel: LocationViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+
+    val popUpToLocationsList: () -> Unit = {
+        navigator.navigate(LocationsScreenDestination) {
+            popUpTo(LocationScreenDestination) {
+                inclusive = true
+            }
+        }
+    }
+
     val actions = LocationActions(
-        onBackClicked = navigator::navigateUp,
+        onBackClicked = popUpToLocationsList,
+        onDefaultLocationButtonClicked = viewModel::toggleLocationDefault,
         onDateSelected = viewModel::onDetailsDateSelected,
         onCalendarDateRangeChanged = viewModel::onCalendarDateRangeChanged
     )
     val events = viewModel.events
+
+    BackHandler { popUpToLocationsList() }
+
     LocationContent(
         state = state,
         actions = actions,
@@ -86,7 +114,12 @@ private fun LocationContent(
         state as LocationState.Ready
         Scaffold(
             topBar = {
-                LocationTopBar(location = state.location, onBackClicked = actions.onBackClicked)
+                LocationTopBar(
+                    location = state.location,
+                    locationSetAsDefault = state.locationSetAsDefault,
+                    onToggleLocationDefaultClicked = actions.onDefaultLocationButtonClicked,
+                    onBackClicked = actions.onBackClicked,
+                )
             }
         ) { padding ->
             val pagerState = rememberPagerState()
@@ -108,7 +141,11 @@ private fun LocationContent(
                     .padding(padding)
             ) {
                 Tabs(pagerState = pagerState)
-                HorizontalPager(count = 2, state = pagerState, verticalAlignment = Alignment.Top) { page ->
+                HorizontalPager(
+                    count = 2,
+                    state = pagerState,
+                    verticalAlignment = Alignment.Top
+                ) { page ->
                     when (page) {
                         0 -> LocationDetailsScreen(locationDetails = state.details)
                         1 -> CalendarScreen(
@@ -128,6 +165,8 @@ private fun LocationContent(
 @Composable
 private fun LocationTopBar(
     location: Location,
+    locationSetAsDefault: Boolean,
+    onToggleLocationDefaultClicked: () -> Unit,
     onBackClicked: () -> Unit
 ) {
     CenterAlignedTopAppBar(
@@ -145,7 +184,22 @@ private fun LocationTopBar(
                 CoordinatesText(coordinates = location.coordinates)
             }
         },
+        actions = {
+            DefaultLocationButton(
+                locationSetAsDefault = locationSetAsDefault,
+                onClick = onToggleLocationDefaultClicked
+            )
+        }
     )
+}
+
+
+@Composable
+private fun DefaultLocationButton(locationSetAsDefault: Boolean, onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        val icon = if (locationSetAsDefault) Icons.Default.Star else Icons.Default.StarBorder
+        Icon(imageVector = icon, contentDescription = "Default location")
+    }
 }
 
 @Composable
@@ -163,7 +217,10 @@ private fun CoordinatesText(coordinates: Coordinates) {
         )
         val decimalFormat = "%.2f"
         Text(
-            text = "$decimalFormat | $decimalFormat".format(coordinates.latitude, coordinates.longitude),
+            text = "$decimalFormat | $decimalFormat".format(
+                coordinates.latitude,
+                coordinates.longitude
+            ),
             style = textStyle,
             modifier = Modifier.padding(end = textStyle.fontSize.value.dp + 4.dp)
         )
@@ -193,4 +250,43 @@ private fun Tabs(pagerState: PagerState) {
             )
         }
     }
+}
+
+
+@Preview
+@Composable
+fun LocationContentPreview() {
+    val state = LocationState.Ready(
+        location = Location(
+            name = "Location",
+            coordinates = Coordinates(latitude = 123.0, longitude = 456.0)
+        ),
+        locationSetAsDefault = true,
+        details = LocationDetails(
+            date = LocalDate(2022, 1, 1),
+            dayTime = null,
+            solarNoonTime = LocalTime(12, 0, 0),
+            dayDuration = null,
+            civilTwilight = null,
+            nauticalTwilight = null,
+            astronomicalTwilight = null
+        ),
+        calendarDateRange = LocalDateRange(
+            from = LocalDate(2022, 1, 1),
+            to = LocalDate(2022, 2, 1)
+        ),
+        calendarItems = emptyFlow()
+    )
+
+    LocationContent(
+        state = state,
+        actions = LocationActions(
+            onBackClicked = {},
+            onDefaultLocationButtonClicked = {},
+            onDateSelected = {},
+            onCalendarDateRangeChanged = {}
+        ),
+        events = emptyFlow()
+    )
+
 }

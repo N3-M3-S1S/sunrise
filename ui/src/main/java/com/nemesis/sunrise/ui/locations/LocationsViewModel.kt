@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nemesis.sunrise.data.location.CoordinatesResult
 import com.nemesis.sunrise.data.location.CurrentCoordinatesProvider
+import com.nemesis.sunrise.data.location.DefaultLocationNameStore
 import com.nemesis.sunrise.domain.location.Location
 import com.nemesis.sunrise.domain.location.usecase.DeleteLocations
 import com.nemesis.sunrise.domain.location.usecase.GetLocations
@@ -16,8 +17,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ class LocationsViewModel @Inject constructor(
     private val deleteLocations: DeleteLocations,
     @Named(AppModule.locationServiceStatusStateFlow)
     private val locationServiceStatus: StateFlow<@JvmSuppressWildcards LocationServiceStatus>,
+    private val defaultLocationNameStore: DefaultLocationNameStore,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val selectionSavedStateKey = "selectionActive"
@@ -62,11 +64,12 @@ class LocationsViewModel @Inject constructor(
     private fun observeLocations() {
         getLocations()
             .onEach { newLocations -> locations = newLocations }
-            .map { locations ->
-                locations.map {
+            .combine(defaultLocationNameStore.defaultLocationNameStateFlow) { locations, defaultLocationName ->
+                locations.map { location ->
                     LocationListItemData(
-                        locationName = it.name,
-                        isSelected = selectedLocationsNames.contains(it.name)
+                        locationName = location.name,
+                        locationDefault = location.name == defaultLocationName,
+                        selected = selectedLocationsNames.contains(location.name)
                     )
                 }
             }
@@ -78,7 +81,7 @@ class LocationsViewModel @Inject constructor(
                     )
                 }
             }
-            .launchIn(viewModelScope)
+            .launchIn(viewModelScope) //todo stop collecting when destination goes to navigation backstack
     }
 
     private fun observeLocationServiceStatus() {
@@ -128,7 +131,7 @@ class LocationsViewModel @Inject constructor(
         savedStateHandle[selectionSavedStateKey] = false
         _state.update { state ->
             val listData = state.locationsListData.map {
-                it.copy(isSelected = false)
+                it.copy(selected = false)
             }
             state.copy(
                 locationsListData = listData,
@@ -175,7 +178,7 @@ class LocationsViewModel @Inject constructor(
 
         val locationsListData = _state.value.locationsListData.map {
             if (it.locationName == item.locationName)
-                it.copy(isSelected = isItemSelected)
+                it.copy(selected = isItemSelected)
             else
                 it
         }

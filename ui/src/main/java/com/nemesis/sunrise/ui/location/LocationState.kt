@@ -11,6 +11,7 @@ sealed class LocationState {
     object Loading : LocationState()
     data class Ready(
         val location: Location,
+        val locationSetAsDefault: Boolean,
         val details: LocationDetails,
         val calendarDateRange: LocalDateRange,
         val calendarItems: Flow<PagingData<CalendarItem>>

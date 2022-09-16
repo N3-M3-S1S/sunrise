@@ -7,6 +7,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.nemesis.sunrise.data.location.DefaultLocationNameStore
 import com.nemesis.sunrise.domain.location.Location
 import com.nemesis.sunrise.domain.sun.usecase.GetDayTime
 import com.nemesis.sunrise.ui.destinations.LocationScreenDestination
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
@@ -31,6 +33,7 @@ import javax.inject.Inject
 class LocationViewModel @Inject constructor(
     private val getDayTime: GetDayTime,
     private val locationDetailsStateProvider: LocationDetailsStateProvider,
+    private val defaultLocationNameStore: DefaultLocationNameStore,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val detailsDateSavedStateKey = "date"
@@ -61,19 +64,8 @@ class LocationViewModel @Inject constructor(
     val events: Flow<LocationEvents> = _events
 
     init {
-        viewModelScope.launch {
-            _state.update {
-                LocationState.Ready(
-                    location = location,
-                    details = locationDetailsStateProvider.getLocationDetails(
-                        location,
-                        detailsDate
-                    ),
-                    calendarDateRange = calendarDateRange,
-                    calendarItems = initializeCalendarItemsPagingFlow()
-                )
-            }
-        }
+        initializeLocationData()
+        observeDefaultLocationName()
     }
 
     private fun getLocalDateFromSavedStateHandle(key: String): LocalDate? =
@@ -81,6 +73,33 @@ class LocationViewModel @Inject constructor(
 
     private fun putLocalDateToSavedStateHandle(date: LocalDate, key: String) {
         savedStateHandle[key] = date.toString()
+    }
+
+    private fun initializeLocationData() {
+        _state.update {
+            LocationState.Ready(
+                location = location,
+                locationSetAsDefault = location.name == defaultLocationNameStore.defaultLocationNameStateFlow.value,
+                details = locationDetailsStateProvider.getLocationDetails(
+                    location,
+                    detailsDate
+                ),
+                calendarDateRange = calendarDateRange,
+                calendarItems = initializeCalendarItemsPagingFlow()
+            )
+        }
+    }
+
+    private fun observeDefaultLocationName() {
+        viewModelScope.launch {
+            defaultLocationNameStore.defaultLocationNameStateFlow.drop(1)
+                .collect { defaultLocationName ->
+                    val currentState = _state.value
+                    if (currentState is LocationState.Ready) {
+                        _state.update { currentState.copy(locationSetAsDefault = currentState.location.name == defaultLocationName) }
+                    }
+                }
+        }
     }
 
     private fun initializeCalendarItemsPagingFlow(): Flow<PagingData<CalendarItem>> = Pager(
@@ -94,6 +113,16 @@ class LocationViewModel @Inject constructor(
             calendarItemsPagingSource!!
         },
     ).flow.cachedIn(viewModelScope)
+
+    fun toggleLocationDefault() {
+        val locationSetAsDefault = (_state.value as LocationState.Ready).locationSetAsDefault
+
+        if (locationSetAsDefault) {
+            defaultLocationNameStore.clearDefaultLocationName()
+        } else {
+            defaultLocationNameStore.setDefaultLocationName(location.name)
+        }
+    }
 
     fun onDetailsDateSelected(date: LocalDate) {
         detailsDate = date

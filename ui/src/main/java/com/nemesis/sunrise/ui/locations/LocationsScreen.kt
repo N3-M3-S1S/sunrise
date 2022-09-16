@@ -1,4 +1,8 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@file:OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalAnimationApi::class
+)
 
 package com.nemesis.sunrise.ui.locations
 
@@ -10,13 +14,14 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +35,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -41,10 +45,12 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.AddLocation
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
@@ -68,6 +74,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
@@ -84,12 +91,10 @@ import com.nemesis.sunrise.ui.destinations.LocationScreenDestination
 import com.nemesis.sunrise.ui.destinations.MapScreenDestination
 import com.nemesis.sunrise.ui.theme.Red
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
-@RootNavGraph(start = true)
 @Destination
 @Composable
 fun LocationsScreen(
@@ -383,18 +388,18 @@ private fun EmptyListMessage() {
     val textStyle = MaterialTheme.typography.titleLarge
     val inlineContent = mapOf(
         addLocationIconId to
-            InlineTextContent(
-                Placeholder(
-                    width = textStyle.fontSize,
-                    height = textStyle.fontSize,
-                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.AddLocation,
-                    contentDescription = ""
-                )
-            }
+                InlineTextContent(
+                    Placeholder(
+                        width = textStyle.fontSize,
+                        height = textStyle.fontSize,
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.AddLocation,
+                        contentDescription = ""
+                    )
+                }
     )
     Text(text = text, style = textStyle, inlineContent = inlineContent)
 }
@@ -406,7 +411,17 @@ fun LocationListItem(
     onLongClick: (LocationListItemData) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val cardScale by animateFloatAsState(targetValue = if (data.isSelected) 0.97f else 1f)
+    val selectedStateTransition =
+        updateTransition(targetState = data.selected, label = "locationSelectedStateTransition")
+
+    val cardScale by selectedStateTransition.animateFloat(label = "cardScale") { selected ->
+        if (selected) 0.97f else 1f
+    }
+
+    val borderColor by selectedStateTransition.animateColor(label = "borderColor") { selected ->
+        if (selected) Red else MaterialTheme.colorScheme.outline
+    }
+
     OutlinedCard(
         modifier = modifier
             .fillMaxWidth()
@@ -416,6 +431,7 @@ fun LocationListItem(
                 onClick = { onClick(data) },
                 onLongClick = { onLongClick(data) }
             ),
+        border = CardDefaults.outlinedCardBorder().copy(brush = SolidColor(borderColor))
     ) {
         Row(
             modifier = Modifier
@@ -425,23 +441,14 @@ fun LocationListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = data.locationName.uppercase())
-            AnimatedVisibility(
-                visible = data.isSelected,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                SelectedLocationListItemIndicator()
+            if (data.locationDefault) {
+                DefaultLocationIndicator()
             }
         }
     }
 }
 
 @Composable
-private fun SelectedLocationListItemIndicator(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .clip(CircleShape)
-            .size(12.dp)
-            .background(Red)
-    )
+private fun DefaultLocationIndicator() {
+    Icon(imageVector = Icons.Default.Star, contentDescription = "Default location")
 }

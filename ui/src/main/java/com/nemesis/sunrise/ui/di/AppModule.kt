@@ -27,11 +27,6 @@ interface AppModule {
         @Named(locationServiceStatusMutableStateFlow)
         fun providesLocationStatusMutableStateFlow(@ApplicationContext appContext: Context): MutableStateFlow<LocationServiceStatus> =
             MutableStateFlow(LocationServiceStatus.getCurrentStatus(appContext))
-
-        @Provides
-        @Singleton
-        fun providesDatabase(@ApplicationContext appContext: Context): SunriseDatabase =
-            SunriseDatabase.create(appContext)
     }
 
     @Binds
