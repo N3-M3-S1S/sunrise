@@ -12,8 +12,8 @@ android {
 
     defaultConfig {
         applicationId = "com.nemesis.sunrise"
-        versionCode = 1
-        versionName = "1"
+        versionCode = 2
+        versionName = "1.1"
 
     }
 
