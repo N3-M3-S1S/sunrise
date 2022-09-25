@@ -2,24 +2,39 @@
 
 package com.nemesis.sunrise.ui.location.details
 
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -34,29 +49,76 @@ import kotlinx.datetime.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.time.Duration
+import androidx.compose.animation.AnimatedVisibility
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun LocationDetailsScreen(
+    locationDetails: LocationDetails,
+    todayDetailsButtonVisible: Boolean,
+    onTodayDetailsButtonClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val density = LocalDensity.current
+    val contentPadding = 16.dp
+    val contentPaddingInPixels = density.run { contentPadding.roundToPx() }
+    var todayDetailsButtonHeightInPixels by remember { mutableStateOf(0) }
+
+    Scaffold(
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = todayDetailsButtonVisible,
+                enter = slideInVertically { it + contentPaddingInPixels },
+                exit = slideOutVertically { it + contentPaddingInPixels }
+            ) {
+                TodayDetailsButton(
+                    onClick = onTodayDetailsButtonClicked,
+                    modifier = Modifier.onGloballyPositioned {
+                        todayDetailsButtonHeightInPixels = it.size.height
+                    })
+            }
+        }) {
+        Column(
+            modifier = modifier
+                .padding(contentPadding)
+                .verticalScroll(rememberScrollState())
+                .animateContentSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
+        ) {
+            Date(date = locationDetails.date)
+
+            DayTimeDetails(
+                dayTime = locationDetails.dayTime,
+                dayDuration = locationDetails.dayDuration,
+                solarNoonTime = locationDetails.solarNoonTime
+            )
+
+            Twilights(
+                civilTwilight = locationDetails.civilTwilight,
+                nauticalTwilight = locationDetails.nauticalTwilight,
+                astronomicalTwilight = locationDetails.astronomicalTwilight,
+            )
+
+            if (todayDetailsButtonVisible) { //add space to prevent today details button from covering the content
+                Spacer(modifier = Modifier.height(density.run { todayDetailsButtonHeightInPixels.toDp() }))
+            }
+        }
+    }
+}
 
 @Composable
-fun LocationDetailsScreen(locationDetails: LocationDetails, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
-    ) {
-        Date(date = locationDetails.date)
-
-        DayTimeDetails(
-            dayTime = locationDetails.dayTime,
-            dayDuration = locationDetails.dayDuration,
-            solarNoonTime = locationDetails.solarNoonTime
-        )
-
-        Twilights(
-            civilTwilight = locationDetails.civilTwilight,
-            nauticalTwilight = locationDetails.nauticalTwilight,
-            astronomicalTwilight = locationDetails.astronomicalTwilight,
-        )
-    }
+private fun TodayDetailsButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    ExtendedFloatingActionButton(
+        modifier = modifier,
+        text = { Text(stringResource(id = R.string.today_details)) },
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Today,
+                contentDescription = stringResource(id = R.string.today_details)
+            )
+        },
+        onClick = onClick
+    )
 }
 
 @Composable

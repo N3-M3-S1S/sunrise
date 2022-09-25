@@ -9,7 +9,7 @@ import com.nemesis.sunrise.ui.utils.toLocalTimeRange
 import kotlinx.datetime.LocalDate
 import javax.inject.Inject
 
-class LocationDetailsStateProvider @Inject constructor(
+class LocationDetailsProvider @Inject constructor(
     private val getDayTime: GetDayTime,
     private val getSolarNoon: GetSolarNoon,
     private val getTwilights: GetTwilights

@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -86,8 +85,9 @@ fun LocationScreen(
     val actions = LocationActions(
         onBackClicked = popUpToLocationsList,
         onDefaultLocationButtonClicked = viewModel::toggleLocationDefault,
-        onDateSelected = viewModel::onDetailsDateSelected,
-        onCalendarDateRangeChanged = viewModel::onCalendarDateRangeChanged
+        onDateSelected = viewModel::showDetailsForDate,
+        onCalendarDateRangeChanged = viewModel::showCalendarItemsForDateRange,
+        onTodayDetailsButtonClicked = viewModel::showTodayDetails
     )
     val events = viewModel.events
 
@@ -147,7 +147,11 @@ private fun LocationContent(
                     verticalAlignment = Alignment.Top
                 ) { page ->
                     when (page) {
-                        0 -> LocationDetailsScreen(locationDetails = state.details)
+                        0 -> LocationDetailsScreen(
+                            locationDetails = state.locationDetails,
+                            todayDetailsButtonVisible = state.todayDetailsButtonVisible,
+                            onTodayDetailsButtonClicked = actions.onTodayDetailsButtonClicked
+                        )
                         1 -> CalendarScreen(
                             calendarItems = state.calendarItems,
                             onDateSelected = actions.onDateSelected,
@@ -262,20 +266,21 @@ fun LocationContentPreview() {
             coordinates = Coordinates(latitude = 123.0, longitude = 456.0)
         ),
         locationSetAsDefault = true,
-        details = LocationDetails(
+        locationDetails = LocationDetails(
             date = LocalDate(2022, 1, 1),
             dayTime = null,
             solarNoonTime = LocalTime(12, 0, 0),
             dayDuration = null,
             civilTwilight = null,
             nauticalTwilight = null,
-            astronomicalTwilight = null
+            astronomicalTwilight = null,
         ),
         calendarDateRange = LocalDateRange(
             from = LocalDate(2022, 1, 1),
             to = LocalDate(2022, 2, 1)
         ),
-        calendarItems = emptyFlow()
+        calendarItems = emptyFlow(),
+        todayDetailsButtonVisible = true
     )
 
     LocationContent(
@@ -284,7 +289,8 @@ fun LocationContentPreview() {
             onBackClicked = {},
             onDefaultLocationButtonClicked = {},
             onDateSelected = {},
-            onCalendarDateRangeChanged = {}
+            onCalendarDateRangeChanged = {},
+            onTodayDetailsButtonClicked = {}
         ),
         events = emptyFlow()
     )

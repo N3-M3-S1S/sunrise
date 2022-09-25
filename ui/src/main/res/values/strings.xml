@@ -10,6 +10,7 @@
     <string name="twilight_civil">Civil</string>
     <string name="twilight_nautical">Nautical</string>
     <string name="twilight_astronomical">Astronomical</string>
+    <string name="today_details">Today</string>
     <string name="start">Start</string>
     <string name="end">End</string>
     <string name="daterange_from">From</string>

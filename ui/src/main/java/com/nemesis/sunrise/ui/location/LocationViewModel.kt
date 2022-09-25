@@ -13,7 +13,7 @@ import com.nemesis.sunrise.domain.sun.usecase.GetDayTime
 import com.nemesis.sunrise.ui.destinations.LocationScreenDestination
 import com.nemesis.sunrise.ui.location.calendar.CalendarItem
 import com.nemesis.sunrise.ui.location.calendar.CalendarItemsPagingSource
-import com.nemesis.sunrise.ui.location.details.LocationDetailsStateProvider
+import com.nemesis.sunrise.ui.location.details.LocationDetailsProvider
 import com.nemesis.sunrise.ui.utils.LocalDateRange
 import com.nemesis.sunrise.ui.utils.getCurrentLocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LocationViewModel @Inject constructor(
     private val getDayTime: GetDayTime,
-    private val locationDetailsStateProvider: LocationDetailsStateProvider,
+    private val locationDetailsProvider: LocationDetailsProvider,
     private val defaultLocationNameStore: DefaultLocationNameStore,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -80,10 +80,11 @@ class LocationViewModel @Inject constructor(
             LocationState.Ready(
                 location = location,
                 locationSetAsDefault = location.name == defaultLocationNameStore.defaultLocationNameStateFlow.value,
-                details = locationDetailsStateProvider.getLocationDetails(
+                locationDetails = locationDetailsProvider.getLocationDetails(
                     location,
                     detailsDate
                 ),
+                todayDetailsButtonVisible = selectedDetailsDateIsNotCurrentDate(),
                 calendarDateRange = calendarDateRange,
                 calendarItems = initializeCalendarItemsPagingFlow()
             )
@@ -124,7 +125,11 @@ class LocationViewModel @Inject constructor(
         }
     }
 
-    fun onDetailsDateSelected(date: LocalDate) {
+    fun showTodayDetails() {
+        showDetailsForDate(getCurrentLocalDate())
+    }
+
+    fun showDetailsForDate(date: LocalDate) {
         detailsDate = date
 
         putLocalDateToSavedStateHandle(date, detailsDateSavedStateKey)
@@ -134,17 +139,21 @@ class LocationViewModel @Inject constructor(
                 val readyState = it as LocationState.Ready
 
                 readyState.copy(
-                    details = locationDetailsStateProvider.getLocationDetails(
+                    locationDetails = locationDetailsProvider.getLocationDetails(
                         location,
                         detailsDate
-                    )
+                    ),
+                    todayDetailsButtonVisible = selectedDetailsDateIsNotCurrentDate()
                 )
             }
             _events.emit(LocationEvents.NavigateToDetailsScreen)
         }
     }
 
-    fun onCalendarDateRangeChanged(dateRange: LocalDateRange) {
+    private fun selectedDetailsDateIsNotCurrentDate(): Boolean =
+        detailsDate != getCurrentLocalDate()
+
+    fun showCalendarItemsForDateRange(dateRange: LocalDateRange) {
         calendarDateRange = dateRange
 
         putLocalDateToSavedStateHandle(dateRange.from, calendarFromDateSavedStateKey)

@@ -7,5 +7,6 @@ data class LocationActions(
     val onBackClicked: () -> Unit,
     val onDefaultLocationButtonClicked: () -> Unit,
     val onDateSelected: (LocalDate) -> Unit,
-    val onCalendarDateRangeChanged: (LocalDateRange) -> Unit
+    val onCalendarDateRangeChanged: (LocalDateRange) -> Unit,
+    val onTodayDetailsButtonClicked: () -> Unit
 )
