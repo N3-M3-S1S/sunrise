@@ -63,8 +63,7 @@ fun MapScreen(navigator: DestinationsNavigator, mapViewModel: MapViewModel = hil
     val context = LocalContext.current
     LaunchedEffect(true) {
         mapViewModel.mapScreenEvents.collect { event ->
-            // MapEvents.MoveMapToCoordinates is handled by moveMapToCoordinatesFlow
-            @Suppress("NON_EXHAUSTIVE_WHEN_STATEMENT")
+
             when (event) {
                 is MapEvents.AskForLocationPermission -> locationPermissionRequestLauncher.launch(
                     event.locationPermission
@@ -78,7 +77,7 @@ fun MapScreen(navigator: DestinationsNavigator, mapViewModel: MapViewModel = hil
                     Toast.makeText(context, R.string.current_location_not_found, Toast.LENGTH_SHORT)
                         .show()
                 }
-
+                is MapEvents.MoveMapToCoordinates -> {}  // MapEvents.MoveMapToCoordinates is handled by moveMapToCoordinatesFlow
             }
         }
     }

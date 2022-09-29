@@ -1,8 +1,8 @@
 object Dependencies {
 
     object Android {
-        private const val ANDROID_GRADLE_PLUGIN_VERSION = "7.2.2"
-        private const val CORE_VERSION = "1.8.0"
+        private const val ANDROID_GRADLE_PLUGIN_VERSION = "7.3.0"
+        private const val CORE_VERSION = "1.9.0"
         private const val CORE_LIBRARY_DESUGARING_VERSION = "1.1.5"
 
         const val ANDROID_GRADLE_PLUGIN =
@@ -14,7 +14,7 @@ object Dependencies {
         object Compose {
 
             object Accompanist {
-                private const val VERSION = "0.23.1"
+                private const val VERSION = "0.26.4-beta"
 
                 const val PAGER = "com.google.accompanist:accompanist-pager:$VERSION"
                 const val PAGER_INDICATOR =
@@ -23,11 +23,11 @@ object Dependencies {
                     "com.google.accompanist:accompanist-systemuicontroller:$VERSION"
             }
 
-            private const val COMPOSE_VERSION = "1.2.1"
-            private const val MATERIAL_VERSION = "1.0.0-alpha13"
-            private const val ACTIVITY_VERSION = "1.4.0"
-            private const val PAGING_VERSION = "1.0.0-alpha15"
-            const val COMPILER_VERSION = "1.2.0-rc02"
+            private const val COMPOSE_VERSION = "1.3.0-beta03"
+            private const val MATERIAL_VERSION = "1.0.0-beta03"
+            private const val ACTIVITY_VERSION = "1.6.0"
+            private const val PAGING_VERSION = "1.0.0-alpha16"
+            const val COMPILER_VERSION = "1.3.2"
 
             const val MATERIAL3 = "androidx.compose.material3:material3:$MATERIAL_VERSION"
             const val ACTIVITY = "androidx.activity:activity-compose:$ACTIVITY_VERSION"
@@ -49,13 +49,13 @@ object Dependencies {
         }
 
         object Paging {
-            private const val VERSION = "3.1.1"
+            private const val VERSION = "3.2.0-alpha02"
 
             const val RUNTIME = "androidx.paging:paging-runtime:$VERSION"
         }
 
         object SplashScreen {
-            private const val VERSION = "1.0.0-rc01"
+            private const val VERSION = "1.0.0"
 
             const val SPLASHSCREEN = "androidx.core:core-splashscreen:$VERSION"
         }
@@ -80,7 +80,7 @@ object Dependencies {
     }
 
     object Room {
-        private const val VERSION = "2.4.2"
+        private const val VERSION = "2.5.0-alpha03"
 
         const val RUNTIME = "androidx.room:room-runtime:$VERSION"
         const val COMPILER = "androidx.room:room-compiler:$VERSION"
@@ -88,9 +88,11 @@ object Dependencies {
     }
 
     object Kotlin {
-        private const val KOTLIN_GRADLE_PLUGIN_VERSION = "1.6.21"
+        private const val KOTLIN_GRADLE_PLUGIN_VERSION = "1.7.20"
         private const val DATETIME_VERSION = "0.4.0"
-        private const val COROUTINES_VERSION = "1.6.3"
+        private const val COROUTINES_VERSION = "1.6.4"
+        const val KSP_VERSION = "1.7.20-1.0.7"
+
 
         const val KOTLIN_GRADLE_PLUGIN =
             "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_GRADLE_PLUGIN_VERSION"
@@ -98,16 +100,32 @@ object Dependencies {
         const val COROUTINES = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$COROUTINES_VERSION"
         const val COROUTINES_ANDROID =
             "org.jetbrains.kotlinx:kotlinx-coroutines-core:$COROUTINES_VERSION"
+        const val KSP_PLUGIN = "com.google.devtools.ksp"
     }
 
     object OsmDroid {
-        private const val VERSION = "6.1.13"
+        private const val VERSION = "6.1.14"
 
         const val OSMDROID = "org.osmdroid:osmdroid-android:$VERSION"
     }
 
     object MaterialDialogs {
         const val DATETIME =
-            "com.github.N3-M3-S1S.compose-material-dialogs:datetime:jitpack-SNAPSHOT"
+            "com.github.N3-M3-S1S.compose-material-dialogs:datetime:main-SNAPSHOT"
     }
+
+    object DependencyVersions {
+        const val VERSION = "0.42.0"
+
+        const val DEPENDENCY_VERSIONS_PLUGIN = "com.github.ben-manes.versions"
+
+    }
+
+    object Spotless {
+        const val VERSION = "6.11.0"
+        const val KTLINT_VERSION = "0.47.1"
+
+        const val SPOTLESS_PLUGIN = "com.diffplug.spotless"
+    }
+
 }

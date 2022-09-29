@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import com.nemesis.sunrise.domain.location.Location
 import com.nemesis.sunrise.ui.destinations.LauncherScreenDestination
 import com.nemesis.sunrise.ui.destinations.LocationScreenDestination

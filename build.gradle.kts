@@ -1,6 +1,7 @@
 plugins {
-    id("com.diffplug.spotless") version "6.7.2"
-    id("com.google.devtools.ksp") version "1.6.21-1.0.6"
+    id(Dependencies.Spotless.SPOTLESS_PLUGIN) version Dependencies.Spotless.VERSION
+    id(Dependencies.Kotlin.KSP_PLUGIN) version Dependencies.Kotlin.KSP_VERSION
+    id(Dependencies.DependencyVersions.DEPENDENCY_VERSIONS_PLUGIN) version Dependencies.DependencyVersions.VERSION
 }
 
 allprojects {
@@ -26,7 +27,7 @@ buildscript {
 }
 
 subprojects {
-    plugins.apply("com.diffplug.spotless")
+    plugins.apply(Dependencies.Spotless.SPOTLESS_PLUGIN)
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         kotlinOptions {
@@ -37,7 +38,7 @@ subprojects {
 
     spotless {
         kotlin {
-            ktlint("0.45.2").setUseExperimental(true)
+            ktlint(Dependencies.Spotless.KTLINT_VERSION).setUseExperimental(true)
         }
     }
 }
