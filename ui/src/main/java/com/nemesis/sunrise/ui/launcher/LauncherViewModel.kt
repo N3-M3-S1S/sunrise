@@ -14,14 +14,13 @@ import javax.inject.Inject
 @HiltViewModel
 class LauncherViewModel @Inject constructor(
     defaultLocationNameStore: DefaultLocationNameStore,
-    getLocationByName: GetLocationByName,
+    getLocationByName: GetLocationByName
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<LauncherState> =
         MutableStateFlow(LauncherState.Initializing)
 
     val state: StateFlow<LauncherState> = _state
-
 
     init {
         viewModelScope.launch {
@@ -30,5 +29,4 @@ class LauncherViewModel @Inject constructor(
             _state.value = LauncherState.Ready(defaultLocation = defaultLocation)
         }
     }
-
 }

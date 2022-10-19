@@ -8,5 +8,5 @@ data class AddLocationState(
     val isLatitudeValid: Boolean = true,
     val longitude: String = "",
     val isLongitudeValid: Boolean = true,
-    val isAddLocationAvailable: Boolean = false,
+    val isAddLocationAvailable: Boolean = false
 )

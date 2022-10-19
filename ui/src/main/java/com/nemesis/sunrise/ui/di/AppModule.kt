@@ -1,7 +1,6 @@
 package com.nemesis.sunrise.ui.di
 
 import android.content.Context
-import com.nemesis.sunrise.data.database.SunriseDatabase
 import com.nemesis.sunrise.ui.app.LocationServiceStatus
 import dagger.Binds
 import dagger.Module

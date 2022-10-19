@@ -36,7 +36,6 @@ object DataModule {
         sharedPreferences: SharedPreferences
     ): DefaultLocationNameStore = DefaultLocationNameStore(sharedPreferences)
 
-
     @Provides
     @Singleton
     fun providesSunriseDatabase(@ApplicationContext appContext: Context): SunriseDatabase =
@@ -49,5 +48,4 @@ object DataModule {
             appContext.packageName + "_preferences",
             Context.MODE_PRIVATE
         )
-
 }

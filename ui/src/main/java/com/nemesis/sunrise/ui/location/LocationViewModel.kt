@@ -184,6 +184,5 @@ class LocationViewModel @Inject constructor(
             }
             _events.emit(LocationEvents.ScrollCalendarListToTop)
         }
-
     }
 }

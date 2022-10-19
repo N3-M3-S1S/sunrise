@@ -41,7 +41,7 @@ fun AddLocationScreen(
     navigator: DestinationsNavigator,
     viewModel: AddLocationViewModel = hiltViewModel()
 ) {
-    //move state to viewmodel?
+    // move state to viewmodel?
     val state = AddLocationState(
         name = viewModel.name.collectAsState().value,
         isNameAvailable = viewModel.isNameAvailable.collectAsState().value,
@@ -50,7 +50,7 @@ fun AddLocationScreen(
         isLatitudeValid = viewModel.isLatitudeValid.collectAsState().value,
         longitude = viewModel.longitude.collectAsState().value,
         isLongitudeValid = viewModel.isLongitudeValid.collectAsState().value,
-        isAddLocationAvailable = viewModel.isAddLocationAvailable.collectAsState().value,
+        isAddLocationAvailable = viewModel.isAddLocationAvailable.collectAsState().value
     )
 
     val actions = remember {
@@ -93,7 +93,7 @@ private fun AddLocationContent(state: AddLocationState, actions: AddLocationActi
                     text = state.name,
                     isError = !state.nameContainsOnlyAllowedCharacters || !state.isNameAvailable,
                     errorText = stringResource(id = if (!state.nameContainsOnlyAllowedCharacters) R.string.name_contains_forbidden_characters else R.string.location_with_name_exists),
-                    onTextChanged = actions.onNameChanged,
+                    onTextChanged = actions.onNameChanged
                 )
                 AddLocationTextField(
                     labelText = stringResource(id = R.string.latitude),
@@ -140,7 +140,7 @@ private fun AddLocationTextField(
     errorText: String,
     onTextChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
-    keyboardType: KeyboardType = KeyboardType.Ascii,
+    keyboardType: KeyboardType = KeyboardType.Ascii
 ) {
     OutlinedTextField(
         modifier = modifier,
@@ -160,6 +160,6 @@ private fun AddLocationTextField(
             modifier = Modifier.padding(start = 16.dp)
         )
     } else {
-        Spacer(modifier = Modifier.height(16.dp)) //make space for error text
+        Spacer(modifier = Modifier.height(16.dp)) // make space for error text
     }
 }

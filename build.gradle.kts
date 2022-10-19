@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id(Dependencies.Spotless.SPOTLESS_PLUGIN) version Dependencies.Spotless.VERSION
     id(Dependencies.Kotlin.KSP_PLUGIN) version Dependencies.Kotlin.KSP_VERSION
@@ -29,7 +31,7 @@ buildscript {
 subprojects {
     plugins.apply(Dependencies.Spotless.SPOTLESS_PLUGIN)
 
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions {
             jvmTarget = "11"
             freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
@@ -39,6 +41,7 @@ subprojects {
     spotless {
         kotlin {
             ktlint(Dependencies.Spotless.KTLINT_VERSION).setUseExperimental(true)
+            target("**/*.kt")
         }
     }
 }

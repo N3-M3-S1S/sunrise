@@ -77,11 +77,11 @@ class LocationsViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         locationsListData = locationsListData,
-                        isLocationsListDataLoading = false,
+                        isLocationsListDataLoading = false
                     )
                 }
             }
-            .launchIn(viewModelScope) //todo stop collecting when destination goes to navigation backstack
+            .launchIn(viewModelScope) // todo stop collecting when destination goes to navigation backstack
     }
 
     private fun observeLocationServiceStatus() {
@@ -177,10 +177,11 @@ class LocationsViewModel @Inject constructor(
         }
 
         val locationsListData = _state.value.locationsListData.map {
-            if (it.locationName == item.locationName)
+            if (it.locationName == item.locationName) {
                 it.copy(selected = isItemSelected)
-            else
+            } else {
                 it
+            }
         }
 
         val isSelectionActive = selectedLocationsNames.isNotEmpty()

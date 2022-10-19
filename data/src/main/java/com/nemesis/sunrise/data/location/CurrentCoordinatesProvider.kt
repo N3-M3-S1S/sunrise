@@ -32,9 +32,11 @@ class CurrentCoordinatesProvider(
     private val locationRequestExecutor: Executor = Dispatchers.IO.asExecutor()
 
     suspend fun requestCurrentCoordinates(): CoordinatesResult {
-        if (!locationPermissionGranted()) return CoordinatesResult.LocationPermissionNotGranted(
-            requiredLocationPermission
-        )
+        if (!locationPermissionGranted()) {
+            return CoordinatesResult.LocationPermissionNotGranted(
+                requiredLocationPermission
+            )
+        }
 
         return getCurrentCoordinates()?.let(CoordinatesResult::Success)
             ?: CoordinatesResult.CurrentCoordinatesNotFound
@@ -56,7 +58,7 @@ class CurrentCoordinatesProvider(
 
         if (locationRequests.isEmpty()) return@coroutineScope null
 
-        //get result of first completed location request, if the result is null - remove еру request from the list of requests and repeat until result is not null or the list is empty
+        // get result of first completed location request, if the result is null - remove еру request from the list of requests and repeat until result is not null or the list is empty
         whileSelect {
             locationRequests.forEach { request ->
                 request.onAwait { resultCoordinates ->
@@ -97,10 +99,11 @@ class CurrentCoordinatesProvider(
                     val latitude = reduceCoordinateExcessAccuracy(location.latitude)
                     val longitude = reduceCoordinateExcessAccuracy(location.longitude)
 
-                    if (latitude == 0.0 && longitude == 0.0)
+                    if (latitude == 0.0 && longitude == 0.0) {
                         null
-                    else
+                    } else {
                         Coordinates(latitude, longitude)
+                    }
                 }
                 Log.d(
                     "CurrentCoordinatesProvider",

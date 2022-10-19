@@ -25,5 +25,4 @@ class DefaultLocationNameStore(private val sharedPreferences: SharedPreferences)
             _defaultLocationNameFlow.value = null
         }
     }
-
 }

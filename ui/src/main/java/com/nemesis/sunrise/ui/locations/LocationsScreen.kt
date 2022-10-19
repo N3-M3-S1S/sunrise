@@ -189,7 +189,7 @@ fun LocationsScreen(
 private fun LocationsContent(
     bottomSheetState: ModalBottomSheetState,
     screenState: LocationsState,
-    actions: LocationsActions,
+    actions: LocationsActions
 ) {
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -214,7 +214,7 @@ private fun LocationsContent(
                     onAddLocationClicked = actions.onAddLocationClicked,
                     onDeleteSelectedLocationsClicked = actions.onDeleteSelectedLocationsClicked
                 )
-            },
+            }
         ) {
             LocationsList(
                 data = screenState.locationsListData,
@@ -234,7 +234,6 @@ private fun AddLocationOptionsList(
     isCurrentLocationSearchActive: Boolean,
     onOptionSelected: (LocationsAddOptions) -> Unit,
     modifier: Modifier = Modifier
-
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         ListItem(
@@ -244,25 +243,29 @@ private fun AddLocationOptionsList(
                     onClick = { onOptionSelected(LocationsAddOptions.CURRENT_LOCATION) }
                 ),
             text = {
-                if (isCurrentLocationSearchActive)
+                if (isCurrentLocationSearchActive) {
                     Text(
                         text = stringResource(id = R.string.looking_for_current_location),
                         modifier = Modifier.alpha(ContentAlpha.disabled)
                     )
-                else
+                } else {
                     Text(
                         text = stringResource(id = R.string.current_location),
-                        modifier = if (locationServiceStatus == LocationServiceStatus.DISABLED)
-                            Modifier.alpha(ContentAlpha.disabled) else Modifier
+                        modifier = if (locationServiceStatus == LocationServiceStatus.DISABLED) {
+                            Modifier.alpha(ContentAlpha.disabled)
+                        } else {
+                            Modifier
+                        }
                     )
+                }
             },
             trailing = {
-                if (isCurrentLocationSearchActive)
+                if (isCurrentLocationSearchActive) {
                     CircularProgressIndicator(
                         strokeWidth = 2.dp,
                         modifier = Modifier.size(24.dp)
                     )
-                else if (locationServiceStatus == LocationServiceStatus.DISABLED) {
+                } else if (locationServiceStatus == LocationServiceStatus.DISABLED) {
                     LocationDisabledIcon()
                 }
             }
@@ -313,7 +316,7 @@ private fun LocationsTopBar(
             title = {
                 val titleId = if (selectionActive) R.string.delete else R.string.locations_title
                 Text(
-                    text = stringResource(id = titleId),
+                    text = stringResource(id = titleId)
                 )
             },
             actions = {
@@ -333,7 +336,7 @@ private fun LocationsTopBar(
                         )
                     }
                 }
-            },
+            }
         )
     }
 }
@@ -388,18 +391,18 @@ private fun EmptyListMessage() {
     val textStyle = MaterialTheme.typography.titleLarge
     val inlineContent = mapOf(
         addLocationIconId to
-                InlineTextContent(
-                    Placeholder(
-                        width = textStyle.fontSize,
-                        height = textStyle.fontSize,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.AddLocation,
-                        contentDescription = ""
-                    )
-                }
+            InlineTextContent(
+                Placeholder(
+                    width = textStyle.fontSize,
+                    height = textStyle.fontSize,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.AddLocation,
+                    contentDescription = ""
+                )
+            }
     )
     Text(text = text, style = textStyle, inlineContent = inlineContent)
 }

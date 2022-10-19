@@ -11,7 +11,7 @@ private val ColorScheme = darkColorScheme(
     surfaceVariant = Color(0xff232739),
     primary = Color(0xff6A8AF6),
     error = Red,
-    onPrimary = Color.Black,
+    onPrimary = Color.Black
 )
 
 @Composable

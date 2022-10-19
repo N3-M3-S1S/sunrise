@@ -38,14 +38,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
-import com.nemesis.sunrise.domain.location.Coordinates
 import com.nemesis.sunrise.domain.location.Location
 import com.nemesis.sunrise.ui.R
 import com.nemesis.sunrise.ui.components.BackIconButton
@@ -54,12 +52,10 @@ import com.nemesis.sunrise.ui.destinations.LocationScreenDestination
 import com.nemesis.sunrise.ui.destinations.LocationsScreenDestination
 import com.nemesis.sunrise.ui.location.calendar.CalendarScreen
 import com.nemesis.sunrise.ui.location.details.LocationDetailsScreen
-import com.nemesis.sunrise.ui.location.details.LocationDetailsState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 
@@ -250,4 +246,3 @@ private fun Tabs(pagerState: PagerState) {
         }
     }
 }
-

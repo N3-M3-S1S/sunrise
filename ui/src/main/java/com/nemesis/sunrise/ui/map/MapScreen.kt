@@ -28,8 +28,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.nemesis.sunrise.ui.R
 import com.nemesis.sunrise.domain.location.Coordinates
+import com.nemesis.sunrise.ui.R
 import com.nemesis.sunrise.ui.app.LocationServiceStatus
 import com.nemesis.sunrise.ui.components.BackIconButton
 import com.nemesis.sunrise.ui.components.LocationDisabledIcon
@@ -77,7 +77,7 @@ fun MapScreen(navigator: DestinationsNavigator, mapViewModel: MapViewModel = hil
                     Toast.makeText(context, R.string.current_location_not_found, Toast.LENGTH_SHORT)
                         .show()
                 }
-                is MapEvents.MoveMapToCoordinates -> {}  // MapEvents.MoveMapToCoordinates is handled by moveMapToCoordinatesFlow
+                is MapEvents.MoveMapToCoordinates -> {} // MapEvents.MoveMapToCoordinates is handled by moveMapToCoordinatesFlow
             }
         }
     }
@@ -91,7 +91,7 @@ fun MapScreen(navigator: DestinationsNavigator, mapViewModel: MapViewModel = hil
     MapContent(
         state = state,
         actions = actions,
-        moveToCoordinatesFlow = moveMapToCoordinatesFlow,
+        moveToCoordinatesFlow = moveMapToCoordinatesFlow
     )
 }
 
@@ -109,7 +109,7 @@ private fun MapContent(
                 isCurrentLocationSearchActive = state.isCurrentCoordinatesSearchActive,
                 onCurrentLocationClicked = actions.onCurrentLocationClicked
             )
-        },
+        }
     ) { padding ->
         OsmDroidMap(
             onMapClicked = actions.onMapClicked,

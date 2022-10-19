@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.nemesis.sunrise.domain.location.Location
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -27,5 +26,4 @@ interface LocationsDao {
 
     @Query("SELECT * FROM LocationEntity WHERE lower(name) = lower(:locationName)")
     suspend fun getByName(locationName: String): LocationEntity?
-
 }

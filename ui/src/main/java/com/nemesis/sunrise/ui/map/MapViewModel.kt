@@ -24,7 +24,7 @@ class MapViewModel @Inject constructor(
     private val currentCoordinatesProvider: CurrentCoordinatesProvider,
     @Named(AppModule.locationServiceStatusStateFlow)
     private val locationServiceStatus: StateFlow<@JvmSuppressWildcards LocationServiceStatus>,
-    private val reduceCoordinateExcessAccuracy: ReduceCoordinateExcessAccuracy,
+    private val reduceCoordinateExcessAccuracy: ReduceCoordinateExcessAccuracy
 ) : ViewModel() {
     private val _state = MutableStateFlow(MapState())
     val state: StateFlow<MapState> = _state
