@@ -4,7 +4,7 @@ package com.nemesis.sunrise.domain.sun
 
 import com.nemesis.sunrise.domain.location.Coordinates
 import com.nemesis.sunrise.domain.utils.Degrees
-import com.nemesis.sunrise.domain.utils.InstantRange
+import com.nemesis.sunrise.domain.utils.InstantInterval
 import com.nemesis.sunrise.domain.utils.Radians
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -41,7 +41,7 @@ class SolarEventCalculator {
         coordinates: Coordinates,
         date: LocalDate,
         solarEvent: SolarEvent
-    ): InstantRange? {
+    ): InstantInterval? {
         val fractionalYear = getFractionalYear(date)
         val equationOfTime = getEquationOfTime(fractionalYear)
         val solarDeclination = getSolarDeclination(fractionalYear)
@@ -67,7 +67,7 @@ class SolarEventCalculator {
                 equationOfTime
             )
 
-        return InstantRange(sunEventStartInterval, sunEventEndInterval)
+        return InstantInterval(sunEventStartInterval, sunEventEndInterval)
     }
 
     private fun getZenithDistanceForSolarEvent(solarEvent: SolarEvent): Radians {

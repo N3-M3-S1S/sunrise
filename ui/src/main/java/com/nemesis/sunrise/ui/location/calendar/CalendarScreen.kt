@@ -28,24 +28,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.nemesis.sunrise.ui.R
 import com.nemesis.sunrise.ui.location.LocationEvents
-import com.nemesis.sunrise.ui.theme.Red
-import com.nemesis.sunrise.ui.utils.LocalDateRange
-import com.nemesis.sunrise.ui.utils.buildTimeString
-import com.nemesis.sunrise.ui.utils.formatToString
+import com.nemesis.sunrise.ui.utils.LocalDateInterval
+import com.nemesis.sunrise.ui.utils.StringInterval
+import com.nemesis.sunrise.ui.utils.notAvailableString
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.datetime.date.DatePickerDefaults
@@ -53,30 +49,26 @@ import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Month
-import java.time.format.TextStyle
-import java.util.Locale
-import kotlin.time.Duration
 
 @Composable
 fun CalendarScreen(
-    calendarItems: Flow<PagingData<CalendarItem>>,
+    state: CalendarState,
     onDateSelected: (LocalDate) -> Unit,
-    calendarDateRange: LocalDateRange,
-    onDateRangeChanged: (LocalDateRange) -> Unit,
+    onDateIntervalChanged: (LocalDateInterval) -> Unit,
     scrollCalendarEventFlow: Flow<LocationEvents.ScrollCalendarListToTop>,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CalendarList(
             modifier = Modifier.weight(1f),
-            calendarItems = calendarItems.collectAsLazyPagingItems(),
+            calendarItems = state.calendarItems.collectAsLazyPagingItems(),
             scrollCalendarEventFlow = scrollCalendarEventFlow,
             onItemClicked = { onDateSelected(it.date) }
         )
-        DateRangePicker(
-            initialDateRange = calendarDateRange,
-            onDateRangeChanged = onDateRangeChanged
+        DateIntervalPicker(
+            dateIntervalText = state.calendarDateIntervalText,
+            dateInterval = state.calendarDateInterval,
+            onDateIntervalChanged = onDateIntervalChanged
         )
     }
 }
@@ -86,7 +78,7 @@ private fun CalendarList(
     calendarItems: LazyPagingItems<CalendarItem>,
     onItemClicked: (CalendarItem) -> Unit,
     scrollCalendarEventFlow: Flow<LocationEvents.ScrollCalendarListToTop>,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CalendarListHeader()
@@ -113,23 +105,24 @@ private fun CalendarList(
                     CalendarRow(
                         modifier = Modifier.height(48.dp),
                         day = {
-                            DayText(
-                                day = calendarItem.date.dayOfMonth,
-                                month = calendarItem.date.month
-                            )
+                            Text(text = calendarItem.day)
                         },
                         sunrise = {
-                            Text(text = calendarItem.sunrise.formatToString())
+                            Text(text = calendarItem.dayTime?.start ?: notAvailableString())
                         },
                         sunset = {
-                            Text(text = calendarItem.sunset.formatToString())
+                            Text(text = calendarItem.dayTime?.end ?: notAvailableString())
                         },
                         dayDuration = {
-                            DayDurationText(dayDuration = calendarItem.dayDuration)
+                            Text(text = calendarItem.dayDuration ?: notAvailableString())
                         },
                         difference = {
-                            DifferenceText(differenceWithPreviousDayDuration = calendarItem.differenceWithPreviousDayDuration)
-                        },
+                            val text = calendarItem.differenceWithPreviousDayDuration
+                                ?: notAvailableString()
+                            val textColor =
+                                calendarItem.differenceTextColor ?: LocalTextStyle.current.color
+                            Text(text = text, color = textColor)
+                        }
                     ) { onItemClicked(calendarItem) }
                 }
             }
@@ -143,7 +136,7 @@ private fun CalendarListHeader(modifier: Modifier = Modifier) {
         day = {
             Icon(
                 imageVector = Icons.Default.CalendarToday,
-                contentDescription = "",
+                contentDescription = ""
             )
         },
         sunrise = {
@@ -155,19 +148,19 @@ private fun CalendarListHeader(modifier: Modifier = Modifier) {
         sunset = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_sunset),
-                contentDescription = "",
+                contentDescription = ""
             )
         },
         dayDuration = {
             Icon(
                 imageVector = Icons.Default.Schedule,
-                contentDescription = "",
+                contentDescription = ""
             )
         },
         difference = {
             Icon(
                 imageVector = Icons.Default.Exposure,
-                contentDescription = "",
+                contentDescription = ""
             )
         },
         modifier = modifier
@@ -227,58 +220,10 @@ private fun YearHeader(year: Int, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun DayText(day: Int, month: Month, modifier: Modifier = Modifier) {
-    val monthShortName = month.getDisplayName(
-        TextStyle.SHORT,
-        Locale.getDefault()
-    )
-    Text(modifier = modifier, text = "$day $monthShortName")
-}
-
-@Composable
-private fun DayDurationText(dayDuration: Duration?, modifier: Modifier = Modifier) {
-    val dayDurationText = dayDuration?.toComponents { hours, minutes, seconds, _ ->
-        buildTimeString(
-            hours = hours.toInt(),
-            minutes = minutes,
-            seconds = seconds
-        )
-    } ?: stringResource(id = R.string.not_available)
-    Text(modifier = modifier, text = dayDurationText)
-}
-
-@Composable
-private fun DifferenceText(
-    differenceWithPreviousDayDuration: Duration?,
-    modifier: Modifier = Modifier
-) {
-    if (differenceWithPreviousDayDuration != null) {
-        val (textColor, sign) = when {
-            differenceWithPreviousDayDuration.isNegative() -> Red to "−"
-            differenceWithPreviousDayDuration.isPositive() -> Color.Green to "+"
-            else -> LocalTextStyle.current.color to ""
-        }
-
-        val differenceText =
-            differenceWithPreviousDayDuration.absoluteValue.toComponents { minutes, seconds, _ ->
-                "$sign ${buildTimeString(minutes = minutes.toInt(), seconds = seconds)}"
-            }
-
-        Text(
-            text = differenceText,
-            modifier = modifier,
-            color = textColor,
-            textAlign = TextAlign.Center
-        )
-    } else {
-        Text(text = stringResource(id = R.string.not_available), modifier = modifier)
-    }
-}
-
-@Composable
-private fun DateRangePicker(
-    initialDateRange: LocalDateRange,
-    onDateRangeChanged: (LocalDateRange) -> Unit,
+private fun DateIntervalPicker(
+    dateIntervalText: StringInterval,
+    dateInterval: LocalDateInterval,
+    onDateIntervalChanged: (LocalDateInterval) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -288,10 +233,11 @@ private fun DateRangePicker(
     ) {
         DatePicker(
             title = stringResource(id = R.string.daterange_from),
-            initialDate = initialDateRange.from,
-            isDateAvailableForSelection = { it <= initialDateRange.to },
+            text = dateIntervalText.start,
+            initialDate = dateInterval.start,
+            isDateAvailableForSelection = { it <= dateInterval.end },
             onDateSelected = {
-                onDateRangeChanged(initialDateRange.copy(from = it))
+                onDateIntervalChanged(dateInterval.copy(start = it))
             }
         )
 
@@ -301,10 +247,11 @@ private fun DateRangePicker(
 
         DatePicker(
             title = stringResource(id = R.string.daterange_to),
-            initialDate = initialDateRange.to,
-            isDateAvailableForSelection = { it >= initialDateRange.from },
+            text = dateIntervalText.end,
+            initialDate = dateInterval.end,
+            isDateAvailableForSelection = { it >= dateInterval.start },
             onDateSelected = {
-                onDateRangeChanged(initialDateRange.copy(to = it))
+                onDateIntervalChanged(dateInterval.copy(end = it))
             }
         )
     }
@@ -313,6 +260,7 @@ private fun DateRangePicker(
 @Composable
 private fun DatePicker(
     title: String,
+    text: String,
     initialDate: LocalDate,
     isDateAvailableForSelection: (LocalDate) -> Boolean,
     onDateSelected: (LocalDate) -> Unit,
@@ -338,7 +286,7 @@ private fun DatePicker(
                 )
                 .padding(8.dp)
         ) {
-            Text(remember(initialDate) { initialDate.formatToString() })
+            Text(text)
             Spacer(modifier = Modifier.width(16.dp))
             Icon(
                 imageVector = Icons.Default.CalendarToday,

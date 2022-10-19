@@ -4,6 +4,7 @@ package com.nemesis.sunrise.ui.location.details
 
 import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -40,21 +41,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.nemesis.sunrise.ui.R
-import com.nemesis.sunrise.ui.utils.LocalTime
-import com.nemesis.sunrise.ui.utils.LocalTimeRange
-import com.nemesis.sunrise.ui.utils.buildTimeString
-import com.nemesis.sunrise.ui.utils.formatToString
-import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
-import kotlin.time.Duration
-import androidx.compose.animation.AnimatedVisibility
+import com.nemesis.sunrise.ui.utils.StringInterval
+import com.nemesis.sunrise.ui.utils.notAvailableString
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LocationDetailsScreen(
-    locationDetails: LocationDetails,
+    locationDetailsState: LocationDetailsState,
     todayDetailsButtonVisible: Boolean,
     onTodayDetailsButtonClicked: () -> Unit,
     modifier: Modifier = Modifier
@@ -75,31 +68,33 @@ fun LocationDetailsScreen(
                     onClick = onTodayDetailsButtonClicked,
                     modifier = Modifier.onGloballyPositioned {
                         todayDetailsButtonHeightInPixels = it.size.height
-                    })
+                    }
+                )
             }
-        }) {
+        }
+    ) {
         Column(
             modifier = modifier
                 .padding(contentPadding)
                 .verticalScroll(rememberScrollState())
                 .animateContentSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top)
         ) {
-            Date(date = locationDetails.date)
+            Date(date = locationDetailsState.date, dayOfWeek = locationDetailsState.dayOfWeek)
 
             DayTimeDetails(
-                dayTime = locationDetails.dayTime,
-                dayDuration = locationDetails.dayDuration,
-                solarNoonTime = locationDetails.solarNoonTime
+                dayTime = locationDetailsState.dayTime,
+                dayDuration = locationDetailsState.dayDuration,
+                zenith = locationDetailsState.zenith
             )
 
             Twilights(
-                civilTwilight = locationDetails.civilTwilight,
-                nauticalTwilight = locationDetails.nauticalTwilight,
-                astronomicalTwilight = locationDetails.astronomicalTwilight,
+                civilTwilight = locationDetailsState.civilTwilight,
+                nauticalTwilight = locationDetailsState.nauticalTwilight,
+                astronomicalTwilight = locationDetailsState.astronomicalTwilight
             )
 
-            if (todayDetailsButtonVisible) { //add space to prevent today details button from covering the content
+            if (todayDetailsButtonVisible) { // add space to prevent today details button from covering the content
                 Spacer(modifier = Modifier.height(density.run { todayDetailsButtonHeightInPixels.toDp() }))
             }
         }
@@ -122,40 +117,26 @@ private fun TodayDetailsButton(onClick: () -> Unit, modifier: Modifier = Modifie
 }
 
 @Composable
-private fun Date(date: LocalDate, modifier: Modifier = Modifier) {
+private fun Date(date: String, dayOfWeek: String, modifier: Modifier = Modifier) {
     OutlinedCard(modifier = modifier) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
         ) {
-            DateTitle(date = date)
-            DayOfWeek(dayOfWeek = date.dayOfWeek)
+            Text(text = date, style = MaterialTheme.typography.titleLarge, modifier = modifier)
+            Text(text = dayOfWeek, modifier = modifier)
         }
     }
 }
 
 @Composable
-private fun DateTitle(date: LocalDate, modifier: Modifier = Modifier) {
-    val dateText = remember(date) { date.formatToString() }
-    Text(text = dateText, style = MaterialTheme.typography.titleLarge, modifier = modifier)
-}
-
-@Composable
-private fun DayOfWeek(dayOfWeek: DayOfWeek, modifier: Modifier = Modifier) {
-    val dayOfWeekText = remember(dayOfWeek) {
-        dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
-    }
-    Text(text = dayOfWeekText, modifier = modifier)
-}
-
-@Composable
 private fun DayTimeDetails(
-    dayTime: LocalTimeRange?,
-    dayDuration: Duration?,
-    solarNoonTime: LocalTime,
+    dayTime: StringInterval?,
+    dayDuration: String?,
+    zenith: String,
     modifier: Modifier = Modifier
 ) {
     OutlinedCard(modifier = modifier) {
@@ -171,77 +152,73 @@ private fun DayTimeDetails(
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
 
-            Sunrise(sunriseTime = dayTime?.start)
-            Sunset(sunsetTime = dayTime?.end)
-            DayDuration(dayDuration = dayDuration)
-            Zenith(zenithTime = solarNoonTime)
+            Sunrise(text = dayTime?.start)
+            Sunset(text = dayTime?.end)
+            DayDuration(text = dayDuration)
+            Zenith(text = zenith)
         }
     }
 }
 
 @Composable
-private fun Sunrise(sunriseTime: LocalTime?, modifier: Modifier = Modifier) {
+private fun Sunrise(text: String?, modifier: Modifier = Modifier) {
     DayTimeDetails(
         iconResId = R.drawable.ic_sunrise,
         title = stringResource(id = R.string.sunrise),
-        time = sunriseTime.formatToString(),
+        text = text,
         modifier = modifier
     )
 }
 
 @Composable
-private fun Sunset(sunsetTime: LocalTime?, modifier: Modifier = Modifier) {
+private fun Sunset(text: String?, modifier: Modifier = Modifier) {
     DayTimeDetails(
         iconResId = R.drawable.ic_sunset,
         title = stringResource(id = R.string.sunset),
-        time = sunsetTime.formatToString(),
+        text = text,
         modifier = modifier
     )
 }
 
 @Composable
-private fun DayDuration(modifier: Modifier = Modifier, dayDuration: Duration?) {
-    val dayDurationText = dayDuration?.toComponents { hours, minutes, seconds, _ ->
-        buildTimeString(hours = hours.toInt(), minutes = minutes, seconds = seconds)
-    } ?: stringResource(id = R.string.not_available)
+private fun Zenith(text: String, modifier: Modifier = Modifier) {
+    DayTimeDetails(
+        iconResId = R.drawable.ic_zenith,
+        title = stringResource(id = R.string.zenith),
+        text = text,
+        modifier = modifier
+    )
+}
 
+@Composable
+private fun DayDuration(text: String?, modifier: Modifier = Modifier) {
     DayTimeDetails(
         modifier = modifier,
         iconResId = R.drawable.ic_day_duration,
         title = stringResource(id = R.string.duration),
-        time = dayDurationText
-    )
-}
-
-@Composable
-private fun Zenith(zenithTime: LocalTime, modifier: Modifier = Modifier) {
-    DayTimeDetails(
-        iconResId = R.drawable.ic_zenith,
-        title = stringResource(id = R.string.zenith),
-        time = zenithTime.formatToString(),
-        modifier = modifier
+        text = text
     )
 }
 
 @Composable
 private fun DayTimeDetails(
-    modifier: Modifier = Modifier,
     @DrawableRes
     iconResId: Int,
     title: String,
-    time: String
+    text: String?,
+    modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         TextWithIcon(iconResId = iconResId, text = title)
-        Text(text = time)
+        Text(text = text ?: notAvailableString())
     }
 }
 
 @Composable
 private fun Twilights(
-    civilTwilight: LocalTimeRange?,
-    nauticalTwilight: LocalTimeRange?,
-    astronomicalTwilight: LocalTimeRange?,
+    civilTwilight: StringInterval?,
+    nauticalTwilight: StringInterval?,
+    astronomicalTwilight: StringInterval?,
     modifier: Modifier = Modifier
 ) {
     OutlinedCard(modifier = modifier) {
@@ -255,16 +232,16 @@ private fun Twilights(
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
 
-            TwilightIntervalStartEndHeader()
-            CivilTwilight(civilTwilightInterval = civilTwilight)
-            NauticalTwilight(nauticalTwilightInterval = nauticalTwilight)
-            AstronomicalTwilight(astronomicalTwilightInterval = astronomicalTwilight)
+            TwilightStartEndHeader()
+            CivilTwilight(interval = civilTwilight)
+            NauticalTwilight(interval = nauticalTwilight)
+            AstronomicalTwilight(interval = astronomicalTwilight)
         }
     }
 }
 
 @Composable
-private fun TwilightIntervalStartEndHeader(modifier: Modifier = Modifier) {
+private fun TwilightStartEndHeader(modifier: Modifier = Modifier) {
     Twilight(
         title = null,
         start = stringResource(id = R.string.start),
@@ -275,39 +252,39 @@ private fun TwilightIntervalStartEndHeader(modifier: Modifier = Modifier) {
 
 @Composable
 private fun CivilTwilight(
-    civilTwilightInterval: LocalTimeRange?,
+    interval: StringInterval?,
     modifier: Modifier = Modifier
 ) {
     TwilightInterval(
         iconResId = R.drawable.ic_twilight_civil,
         title = stringResource(id = R.string.twilight_civil),
-        twilightInterval = civilTwilightInterval,
+        interval = interval,
         modifier = modifier
     )
 }
 
 @Composable
 private fun NauticalTwilight(
-    nauticalTwilightInterval: LocalTimeRange?,
+    interval: StringInterval?,
     modifier: Modifier = Modifier
 ) {
     TwilightInterval(
         iconResId = R.drawable.ic_twilight_nautical,
         title = stringResource(id = R.string.twilight_nautical),
-        twilightInterval = nauticalTwilightInterval,
+        interval = interval,
         modifier = modifier
     )
 }
 
 @Composable
 private fun AstronomicalTwilight(
-    astronomicalTwilightInterval: LocalTimeRange?,
+    interval: StringInterval?,
     modifier: Modifier = Modifier
 ) {
     TwilightInterval(
         iconResId = R.drawable.ic_twilight_astronomical,
         title = stringResource(id = R.string.twilight_astronomical),
-        twilightInterval = astronomicalTwilightInterval,
+        interval = interval,
         modifier = modifier
     )
 }
@@ -317,13 +294,13 @@ private fun TwilightInterval(
     @DrawableRes
     iconResId: Int,
     title: String,
-    twilightInterval: LocalTimeRange?,
-    modifier: Modifier = Modifier,
+    interval: StringInterval?,
+    modifier: Modifier = Modifier
 ) {
     Twilight(
         title = { TextWithIcon(iconResId = iconResId, text = title) },
-        start = twilightInterval?.start.formatToString(),
-        end = twilightInterval?.end.formatToString(),
+        start = interval?.start,
+        end = interval?.end,
         modifier = modifier
     )
 }
@@ -331,19 +308,19 @@ private fun TwilightInterval(
 @Composable
 private fun Twilight(
     title: @Composable (() -> Unit)?,
-    start: String,
-    end: String,
+    start: String?,
+    end: String?,
     modifier: Modifier = Modifier
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp), modifier = modifier) {
         Box(modifier = Modifier.weight(0.5f)) { title?.invoke() }
         Text(
-            text = start,
+            text = start ?: notAvailableString(),
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(0.25f)
         )
         Text(
-            text = end,
+            text = end ?: notAvailableString(),
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(0.25f)
         )
@@ -363,7 +340,7 @@ private fun TextWithIcon(
     ) {
         Icon(
             painter = painterResource(id = iconResId),
-            contentDescription = "",
+            contentDescription = ""
         )
         Text(text = text)
     }

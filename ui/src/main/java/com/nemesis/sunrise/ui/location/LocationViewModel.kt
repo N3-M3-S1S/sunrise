@@ -9,12 +9,15 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.nemesis.sunrise.data.location.DefaultLocationNameStore
 import com.nemesis.sunrise.domain.location.Location
-import com.nemesis.sunrise.domain.sun.usecase.GetDayTime
 import com.nemesis.sunrise.ui.destinations.LocationScreenDestination
 import com.nemesis.sunrise.ui.location.calendar.CalendarItem
+import com.nemesis.sunrise.ui.location.calendar.CalendarItemsFactory
 import com.nemesis.sunrise.ui.location.calendar.CalendarItemsPagingSource
+import com.nemesis.sunrise.ui.location.calendar.CalendarState
 import com.nemesis.sunrise.ui.location.details.LocationDetailsProvider
-import com.nemesis.sunrise.ui.utils.LocalDateRange
+import com.nemesis.sunrise.ui.utils.LocalDateFormatter
+import com.nemesis.sunrise.ui.utils.LocalDateInterval
+import com.nemesis.sunrise.ui.utils.StringInterval
 import com.nemesis.sunrise.ui.utils.getCurrentLocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -31,28 +34,29 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(
-    private val getDayTime: GetDayTime,
     private val locationDetailsProvider: LocationDetailsProvider,
     private val defaultLocationNameStore: DefaultLocationNameStore,
+    private val localDateFormatter: LocalDateFormatter,
+    private val calendarItemsFactory: CalendarItemsFactory,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val detailsDateSavedStateKey = "date"
-    private val calendarFromDateSavedStateKey = "from"
-    private val calendarToDateSavedStateKey = "to"
+    private val calendarStartDateSavedStateKey = "start"
+    private val calendarEndDateSavedStateKey = "end"
 
     private val location: Location = LocationScreenDestination.argsFrom(savedStateHandle).location
 
     private var detailsDate: LocalDate =
         getLocalDateFromSavedStateHandle(detailsDateSavedStateKey) ?: getCurrentLocalDate()
 
-    private var calendarDateRange: LocalDateRange = run {
-        val calendarFromDate =
-            getLocalDateFromSavedStateHandle(calendarFromDateSavedStateKey) ?: detailsDate
+    private var calendarDateInterval: LocalDateInterval = run {
+        val startDate =
+            getLocalDateFromSavedStateHandle(calendarStartDateSavedStateKey) ?: detailsDate
 
-        val calendarToDate = getLocalDateFromSavedStateHandle(calendarToDateSavedStateKey)
-            ?: calendarFromDate.plus(1, DateTimeUnit.YEAR)
+        val endDate = getLocalDateFromSavedStateHandle(calendarEndDateSavedStateKey)
+            ?: startDate.plus(1, DateTimeUnit.YEAR)
 
-        LocalDateRange(from = calendarFromDate, to = calendarToDate)
+        LocalDateInterval(start = startDate, end = endDate)
     }
 
     private var calendarItemsPagingSource: CalendarItemsPagingSource? = null
@@ -80,16 +84,24 @@ class LocationViewModel @Inject constructor(
             LocationState.Ready(
                 location = location,
                 locationSetAsDefault = location.name == defaultLocationNameStore.defaultLocationNameStateFlow.value,
-                locationDetails = locationDetailsProvider.getLocationDetails(
+                locationDetailsState = locationDetailsProvider.getLocationDetails(
                     location,
                     detailsDate
                 ),
                 todayDetailsButtonVisible = selectedDetailsDateIsNotCurrentDate(),
-                calendarDateRange = calendarDateRange,
-                calendarItems = initializeCalendarItemsPagingFlow()
+                calendarState = CalendarState(
+                    calendarDateInterval = calendarDateInterval,
+                    calendarDateIntervalText = formatCalendarDateIntervalToText(),
+                    calendarItems = initializeCalendarItemsPagingFlow()
+                )
             )
         }
     }
+
+    private fun formatCalendarDateIntervalToText(): StringInterval = StringInterval(
+        start = localDateFormatter.formatToString(calendarDateInterval.start),
+        end = localDateFormatter.formatToString(calendarDateInterval.end)
+    )
 
     private fun observeDefaultLocationName() {
         viewModelScope.launch {
@@ -107,12 +119,12 @@ class LocationViewModel @Inject constructor(
         config = PagingConfig(pageSize = 90, enablePlaceholders = false),
         pagingSourceFactory = {
             calendarItemsPagingSource = CalendarItemsPagingSource(
-                location = location,
-                dateRange = calendarDateRange,
-                getDayTime = getDayTime
+                coordinates = location.coordinates,
+                dateRange = calendarDateInterval,
+                calendarItemsFactory = calendarItemsFactory
             )
             calendarItemsPagingSource!!
-        },
+        }
     ).flow.cachedIn(viewModelScope)
 
     fun toggleLocationDefault() {
@@ -139,7 +151,7 @@ class LocationViewModel @Inject constructor(
                 val readyState = it as LocationState.Ready
 
                 readyState.copy(
-                    locationDetails = locationDetailsProvider.getLocationDetails(
+                    locationDetailsState = locationDetailsProvider.getLocationDetails(
                         location,
                         detailsDate
                     ),
@@ -153,20 +165,25 @@ class LocationViewModel @Inject constructor(
     private fun selectedDetailsDateIsNotCurrentDate(): Boolean =
         detailsDate != getCurrentLocalDate()
 
-    fun showCalendarItemsForDateRange(dateRange: LocalDateRange) {
-        calendarDateRange = dateRange
+    fun calendarDateIntervalChanged(dateInterval: LocalDateInterval) {
+        calendarDateInterval = dateInterval
 
-        putLocalDateToSavedStateHandle(dateRange.from, calendarFromDateSavedStateKey)
-        putLocalDateToSavedStateHandle(dateRange.to, calendarToDateSavedStateKey)
+        putLocalDateToSavedStateHandle(dateInterval.start, calendarStartDateSavedStateKey)
+        putLocalDateToSavedStateHandle(dateInterval.end, calendarEndDateSavedStateKey)
 
         calendarItemsPagingSource?.invalidate()
 
         viewModelScope.launch {
             _state.update {
                 val readyState = _state.value as LocationState.Ready
-                readyState.copy(calendarDateRange = dateRange)
+                val calendarState = readyState.calendarState.copy(
+                    calendarDateInterval = calendarDateInterval,
+                    calendarDateIntervalText = formatCalendarDateIntervalToText()
+                )
+                readyState.copy(calendarState = calendarState)
             }
             _events.emit(LocationEvents.ScrollCalendarListToTop)
         }
+
     }
 }

@@ -1,13 +1,14 @@
 package com.nemesis.sunrise.ui.location.calendar
 
-import com.nemesis.sunrise.ui.utils.LocalTime
+import androidx.compose.ui.graphics.Color
+import com.nemesis.sunrise.ui.utils.StringInterval
 import kotlinx.datetime.LocalDate
-import kotlin.time.Duration
 
 data class CalendarItem(
     val date: LocalDate,
-    val sunrise: LocalTime?,
-    val sunset: LocalTime?,
-    val dayDuration: Duration?,
-    val differenceWithPreviousDayDuration: Duration?
+    val day: String,
+    val dayTime: StringInterval?,
+    val dayDuration: String?,
+    val differenceWithPreviousDayDuration: String?,
+    val differenceTextColor: Color?
 )

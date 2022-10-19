@@ -1,9 +1,9 @@
 package com.nemesis.sunrise.domain.sun
 
-import com.nemesis.sunrise.domain.utils.InstantRange
+import com.nemesis.sunrise.domain.utils.InstantInterval
 
 data class Twilights(
-    val civilTwilight: InstantRange?,
-    val nauticalTwilight: InstantRange?,
-    val astronomicalTwilight: InstantRange?
+    val civilTwilight: InstantInterval?,
+    val nauticalTwilight: InstantInterval?,
+    val astronomicalTwilight: InstantInterval?
 )

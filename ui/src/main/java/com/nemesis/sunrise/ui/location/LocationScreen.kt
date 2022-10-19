@@ -1,6 +1,6 @@
 @file:OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalPagerApi::class,
+    ExperimentalPagerApi::class
 )
 
 package com.nemesis.sunrise.ui.location
@@ -45,18 +45,16 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
-import com.nemesis.sunrise.ui.R
 import com.nemesis.sunrise.domain.location.Coordinates
 import com.nemesis.sunrise.domain.location.Location
+import com.nemesis.sunrise.ui.R
 import com.nemesis.sunrise.ui.components.BackIconButton
 import com.nemesis.sunrise.ui.components.pagerTabIndicatorOffsetMaterial3
 import com.nemesis.sunrise.ui.destinations.LocationScreenDestination
 import com.nemesis.sunrise.ui.destinations.LocationsScreenDestination
 import com.nemesis.sunrise.ui.location.calendar.CalendarScreen
-import com.nemesis.sunrise.ui.location.details.LocationDetails
 import com.nemesis.sunrise.ui.location.details.LocationDetailsScreen
-import com.nemesis.sunrise.ui.utils.LocalDateRange
-import com.nemesis.sunrise.ui.utils.LocalTime
+import com.nemesis.sunrise.ui.location.details.LocationDetailsState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
@@ -64,7 +62,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
 
 @Destination(navArgsDelegate = LocationScreenNavArgs::class)
 @Composable
@@ -86,7 +83,7 @@ fun LocationScreen(
         onBackClicked = popUpToLocationsList,
         onDefaultLocationButtonClicked = viewModel::toggleLocationDefault,
         onDateSelected = viewModel::showDetailsForDate,
-        onCalendarDateRangeChanged = viewModel::showCalendarItemsForDateRange,
+        onCalendarDateRangeChanged = viewModel::calendarDateIntervalChanged,
         onTodayDetailsButtonClicked = viewModel::showTodayDetails
     )
     val events = viewModel.events
@@ -104,7 +101,7 @@ fun LocationScreen(
 private fun LocationContent(
     state: LocationState,
     actions: LocationActions,
-    events: Flow<LocationEvents>,
+    events: Flow<LocationEvents>
 ) {
     AnimatedVisibility(
         visible = state != LocationState.Loading,
@@ -118,7 +115,7 @@ private fun LocationContent(
                     location = state.location,
                     locationSetAsDefault = state.locationSetAsDefault,
                     onToggleLocationDefaultClicked = actions.onDefaultLocationButtonClicked,
-                    onBackClicked = actions.onBackClicked,
+                    onBackClicked = actions.onBackClicked
                 )
             }
         ) { padding ->
@@ -148,15 +145,14 @@ private fun LocationContent(
                 ) { page ->
                     when (page) {
                         0 -> LocationDetailsScreen(
-                            locationDetails = state.locationDetails,
+                            locationDetailsState = state.locationDetailsState,
                             todayDetailsButtonVisible = state.todayDetailsButtonVisible,
                             onTodayDetailsButtonClicked = actions.onTodayDetailsButtonClicked
                         )
                         1 -> CalendarScreen(
-                            calendarItems = state.calendarItems,
+                            state = state.calendarState,
                             onDateSelected = actions.onDateSelected,
-                            calendarDateRange = state.calendarDateRange,
-                            onDateRangeChanged = actions.onCalendarDateRangeChanged,
+                            onDateIntervalChanged = actions.onCalendarDateRangeChanged,
                             scrollCalendarEventFlow = events.filterIsInstance()
                         )
                     }
@@ -185,7 +181,10 @@ private fun LocationTopBar(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                CoordinatesText(coordinates = location.coordinates)
+                CoordinatesText(
+                    latitude = location.coordinates.latitude,
+                    longitude = location.coordinates.longitude
+                )
             }
         },
         actions = {
@@ -197,7 +196,6 @@ private fun LocationTopBar(
     )
 }
 
-
 @Composable
 private fun DefaultLocationButton(locationSetAsDefault: Boolean, onClick: () -> Unit) {
     IconButton(onClick = onClick) {
@@ -207,7 +205,7 @@ private fun DefaultLocationButton(locationSetAsDefault: Boolean, onClick: () -> 
 }
 
 @Composable
-private fun CoordinatesText(coordinates: Coordinates) {
+private fun CoordinatesText(latitude: Double, longitude: Double) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -217,14 +215,11 @@ private fun CoordinatesText(coordinates: Coordinates) {
         Icon(
             modifier = Modifier.size(textStyle.fontSize.value.dp),
             imageVector = Icons.Filled.MyLocation,
-            contentDescription = "",
+            contentDescription = ""
         )
         val decimalFormat = "%.2f"
         Text(
-            text = "$decimalFormat | $decimalFormat".format(
-                coordinates.latitude,
-                coordinates.longitude
-            ),
+            text = "$decimalFormat | $decimalFormat".format(latitude, longitude),
             style = textStyle,
             modifier = Modifier.padding(end = textStyle.fontSize.value.dp + 4.dp)
         )
@@ -256,43 +251,3 @@ private fun Tabs(pagerState: PagerState) {
     }
 }
 
-
-@Preview
-@Composable
-fun LocationContentPreview() {
-    val state = LocationState.Ready(
-        location = Location(
-            name = "Location",
-            coordinates = Coordinates(latitude = 123.0, longitude = 456.0)
-        ),
-        locationSetAsDefault = true,
-        locationDetails = LocationDetails(
-            date = LocalDate(2022, 1, 1),
-            dayTime = null,
-            solarNoonTime = LocalTime(12, 0, 0),
-            dayDuration = null,
-            civilTwilight = null,
-            nauticalTwilight = null,
-            astronomicalTwilight = null,
-        ),
-        calendarDateRange = LocalDateRange(
-            from = LocalDate(2022, 1, 1),
-            to = LocalDate(2022, 2, 1)
-        ),
-        calendarItems = emptyFlow(),
-        todayDetailsButtonVisible = true
-    )
-
-    LocationContent(
-        state = state,
-        actions = LocationActions(
-            onBackClicked = {},
-            onDefaultLocationButtonClicked = {},
-            onDateSelected = {},
-            onCalendarDateRangeChanged = {},
-            onTodayDetailsButtonClicked = {}
-        ),
-        events = emptyFlow()
-    )
-
-}
